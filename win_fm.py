@@ -35,6 +35,7 @@ class WindowFileManager:
     BOTTOM = 0
     CURRENT_CURSOR = 0
     inserted_word = ""
+    test = ""
 
     def __init__(self):
         self.currentDirectory = "/home/lukasz"
@@ -120,14 +121,27 @@ class WindowFileManager:
     def navigate_path(self, path):
         """Function to change the currentDirectory path and create the window again"""
         self.outwin.erase()
-        self.currentDirectory += "/" + path 
+        self.currentDirectory += "/" + path
+        self.test = path.replace("\n", "")
+        self.outwin.refresh()
+        self.currentDirectory = self.currentDirectory.replace("\n", "") 
+        self.inserted_word = ""
+        self.create()
+
+    def navigate_back(self):
+        self.outwin.erase()
+        temp = self.currentDirectory.split("/")
+        del temp[-1]
+        self.test = str(temp)
+        self.outwin.refresh()
+        self.currentDirectory = "/".join(temp)
         self.create()
 
     def run_loop(self):
         while True:
             try:
-                #if self.inserted_word != "":
-                #    self.outwin.addstr(self.height-1, 1, str(self.inserted_word))
+                if self.inserted_word != "":
+                    self.outwin.addstr(self.height-1, 1, str(self.test))
                 key = self.outwin.getch()
                 self.get_input_key(key)
             except KeyboardInterrupt:
@@ -168,12 +182,11 @@ class WindowFileManager:
         if key==10: # ENTER KEY
             self.navigate_path(self.inserted_word)
             self.create()
-        if key==127: # BACKSPACE KEY
-            self.navigate_path(self.inserted_word)
-            self.create()
-        if key==curses.KEY_RESIZE:
+        elif key==127: # BACKSPACE KEY
+            self.navigate_back()
+        elif key==curses.KEY_RESIZE:
             self.display_window()
-        if key==27:
+        elif key==27:
             self.inserted_word = ""
         else:
             self.inserted_word += str(chr(key))
