@@ -52,9 +52,13 @@ class WindowFileManager:
             curses.start_color()
         self.height, self.width = self.outwin.getmaxyx()
         self.outwin.box()
-        self.run_ls()
-    
-    def add_file_to_screen(self, filename, isDir):
+        try:
+            self.run_ls()
+        except:
+            self.currentDirectory = "/"
+            self.create()    
+
+    def add_file_to_screen(self, filename, isDir, isSelected):
         """Function to add a folder or a file to the screen"""
         pos = self.pos_idx
         dim = self.file_dimension
@@ -63,7 +67,7 @@ class WindowFileManager:
             pos["x"] = 1
             pos["y"] += dim["y"] + 1
         if pos["y"] + dim["y"] + 1 < self.height:
-            self.draw_folder() if isDir else self.draw_file()
+            self.draw_folder(isSelected) if isDir else self.draw_file(isSelected)
             # Add file name
             self.outwin.addstr(pos["y"]+dim["y"] -1, pos["x"], filename[:dim["x"]], curses.A_UNDERLINE if isDir else curses.A_NORMAL )
 
@@ -78,38 +82,38 @@ class WindowFileManager:
         self.files_on_screen = len(self.onlydirs) + len(self.onlyfiles)
         self.BOTTOM = ceil(self.files_on_screen / (self.width // self.file_dimension["x"] + 1)) * (self.file_dimension["y"] + 1)
         for el in self.onlydirs:
-            self.add_file_to_screen(el, True)
+            self.add_file_to_screen(el, True, el != self.selected_filename)
         for el in self.onlyfiles:
-            self.add_file_to_screen(el, False)
+            self.add_file_to_screen(el, False, el != self.selected_filename)
 
-    def draw_folder(self):
+    def draw_folder(self, isSelected):
         """Function used to draw the folder"""
         pos = self.pos_idx
         dim = self.file_dimension
         up_dir = "┏━━┓"
         up_dir = up_dir.encode("utf-8", "ignore").decode("utf-8")
-        self.outwin.addstr(pos["y"], pos["x"]+dim["x"]-4, up_dir)
+        self.outwin.addstr(pos["y"], pos["x"]+dim["x"]-4, up_dir, curses.A_NORMAL if isSelected else curses.A_REVERSE)
         for y in range(1, dim["y"]-1):
             for x in range(0, dim["x"]):
                 if y == 1:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┏" if x==0  else ("┃" if x==dim["x"]-1 else ("┛" if x==dim["x"]-4 else "━")), curses.A_NORMAL)
+                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┏" if x==0  else ("┃" if x==dim["x"]-1 else ("┛" if x==dim["x"]-4 else "━")),  curses.A_NORMAL if isSelected else curses.A_REVERSE)
                 elif y == dim["y"]-2:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┗" if x==0  else ("┛" if x==dim["x"]-1 else "━"), curses.A_NORMAL)
+                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┗" if x==0  else ("┛" if x==dim["x"]-1 else "━"),  curses.A_NORMAL if isSelected else curses.A_REVERSE)
                 else:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┃" if x==0 or x==dim["x"]-1 else " ")
+                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┃" if x==0 or x==dim["x"]-1 else " ", curses.A_NORMAL if isSelected else curses.A_REVERSE)
     
-    def draw_file(self):
+    def draw_file(self, isSelected):
         """Function used to draw the file"""
         pos = self.pos_idx
         dim = self.file_dimension
         for y in range(0, dim["y"]-1):
             for x in range(0, dim["x"]):
                 if y == 0:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┏" if x==0  else ("┓" if x==dim["x"]-1 else "━"), curses.A_NORMAL)
+                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┏" if x==0  else ("┓" if x==dim["x"]-1 else "━"), curses.A_NORMAL if isSelected else curses.A_REVERSE)
                 elif y == dim["y"]-2:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┗" if x==0  else ("┛" if x==dim["x"]-1 else "━"), curses.A_NORMAL)
+                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┗" if x==0  else ("┛" if x==dim["x"]-1 else "━"), curses.A_NORMAL if isSelected else curses.A_REVERSE)
                 else:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┃" if x==0 or x==dim["x"]-1 else "-")
+                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┃" if x==0 or x==dim["x"]-1 else "-", curses.A_NORMAL if isSelected else curses.A_REVERSE)
 
     def display_window(self):
         """Functin used to update the window and refresh the screen on resize"""
@@ -163,7 +167,7 @@ class WindowFileManager:
         # Down direction scroll overflow
         # next cursor position touch the max lines, but absolute position of max lines could not touch the bottom
         if (direction == self.DOWN) and (next_line == self.height) and (self.TOP + self.height < self.BOTTOM):
-            self.top += direction
+            self.TOP += direction
             return
         # Scroll up
         # current cursor position or top position is greater than 0
@@ -176,11 +180,20 @@ class WindowFileManager:
             self.current = next_line
             return
 
+    def update_selection(self):
+        self.run_ls()
+        all_files = self.onlydirs + self.onlyfiles 
+        for x in all_files:
+            if x.find(self.inserted_word) == 0:
+                self.selected_filename = x
+                break
+        
+
     def get_input_key(self, key):
         """Function that retrieve an input from the user and parse it"""
         self.height, self.width = self.outwin.getmaxyx()
         if key==10: # ENTER KEY
-            self.navigate_path(self.inserted_word)
+            self.navigate_path(self.selected_filename)
             self.create()
         elif key==127: # BACKSPACE KEY
             self.navigate_back()
@@ -190,6 +203,7 @@ class WindowFileManager:
             self.inserted_word = ""
         else:
             self.inserted_word += str(chr(key))
+            self.update_selection()
 
 def main():
     WindowFileManager()
