@@ -2,15 +2,9 @@
 
 import curses
 import os
-from os.path import isfile, join
-import sys
-import locale 
+from os.path import isfile, join 
 from math import ceil
-
-locale.setlocale(locale.LC_ALL, '')
-reload(sys)
-sys.setdefaultencoding('utf8')
-
+from modules.draw_mod import draw_file, draw_folder
 
 
 class WindowFileManager:
@@ -67,7 +61,7 @@ class WindowFileManager:
             pos["x"] = 1
             pos["y"] += dim["y"] + 1
         if pos["y"] + dim["y"] + 1 < self.height:
-            self.draw_folder(isSelected) if isDir else self.draw_file(isSelected)
+            draw_folder(self, isSelected) if isDir else draw_file(self, isSelected) #self.draw_file(isSelected)
             # Add file name
             self.outwin.addstr(pos["y"]+dim["y"] -1, pos["x"], filename[:dim["x"]], curses.A_UNDERLINE if isDir else curses.A_NORMAL )
 
@@ -85,35 +79,6 @@ class WindowFileManager:
             self.add_file_to_screen(el, True, el != self.selected_filename)
         for el in self.onlyfiles:
             self.add_file_to_screen(el, False, el != self.selected_filename)
-
-    def draw_folder(self, isSelected):
-        """Function used to draw the folder"""
-        pos = self.pos_idx
-        dim = self.file_dimension
-        up_dir = "┏━━┓"
-        up_dir = up_dir.encode("utf-8", "ignore").decode("utf-8")
-        self.outwin.addstr(pos["y"], pos["x"]+dim["x"]-4, up_dir, curses.A_NORMAL if isSelected else curses.A_REVERSE)
-        for y in range(1, dim["y"]-1):
-            for x in range(0, dim["x"]):
-                if y == 1:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┏" if x==0  else ("┃" if x==dim["x"]-1 else ("┛" if x==dim["x"]-4 else "━")),  curses.A_NORMAL if isSelected else curses.A_REVERSE)
-                elif y == dim["y"]-2:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┗" if x==0  else ("┛" if x==dim["x"]-1 else "━"),  curses.A_NORMAL if isSelected else curses.A_REVERSE)
-                else:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┃" if x==0 or x==dim["x"]-1 else " ", curses.A_NORMAL if isSelected else curses.A_REVERSE)
-    
-    def draw_file(self, isSelected):
-        """Function used to draw the file"""
-        pos = self.pos_idx
-        dim = self.file_dimension
-        for y in range(0, dim["y"]-1):
-            for x in range(0, dim["x"]):
-                if y == 0:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┏" if x==0  else ("┓" if x==dim["x"]-1 else "━"), curses.A_NORMAL if isSelected else curses.A_REVERSE)
-                elif y == dim["y"]-2:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┗" if x==0  else ("┛" if x==dim["x"]-1 else "━"), curses.A_NORMAL if isSelected else curses.A_REVERSE)
-                else:
-                    self.outwin.addstr(pos["y"] + y, pos["x"] + x, "┃" if x==0 or x==dim["x"]-1 else "-", curses.A_NORMAL if isSelected else curses.A_REVERSE)
 
     def display_window(self):
         """Functin used to update the window and refresh the screen on resize"""
