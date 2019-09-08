@@ -2,14 +2,16 @@
 
 import curses
 import os
-from os.path import isfile, join 
+from os.path import isfile, join
 from math import ceil
 from modules.draw_mod import draw_file, draw_folder
+from modules.create_file import *
 
 
 class WindowFileManager:
-    outwin =""
+    outwin = ""
     currentDirectory = ""
+    hide_hidden_files = True
     onlydirs = []
     onlyfiles = []
     file_dimension = {
@@ -17,22 +19,17 @@ class WindowFileManager:
         "y": 5
     }
     pos_idx = {
-        "x" : 1,
-        "y" : 1
+        "x": 1,
+        "y": 1
     }
-    selected_filename = ".." # FIX THIS
+    selected_filename = ".."  # FIX THIS
     height = 0
-    width = 0 
-    UP = -1
-    DOWN = 1
-    TOP = 0
-    BOTTOM = 0
-    CURRENT_CURSOR = 0
+    width = 0
     inserted_word = ""
     test = ""
 
     def __init__(self):
-        self.currentDirectory = "/home/lukasz"
+        self.currentDirectory = "/home/lukasz"  # change with default home
         self.create()
         self.run_loop()
 
@@ -50,7 +47,7 @@ class WindowFileManager:
             self.run_ls()
         except:
             self.currentDirectory = "/"
-            self.create()    
+            self.create()
 
     def add_file_to_screen(self, filename, isDir, isSelected):
         """Function to add a folder or a file to the screen"""
@@ -61,20 +58,33 @@ class WindowFileManager:
             pos["x"] = 1
             pos["y"] += dim["y"] + 1
         if pos["y"] + dim["y"] + 1 < self.height:
-            draw_folder(self, isSelected) if isDir else draw_file(self, isSelected) #self.draw_file(isSelected)
-            # Add file name
-            self.outwin.addstr(pos["y"]+dim["y"] -1, pos["x"], filename[:dim["x"]], curses.A_UNDERLINE if isDir else curses.A_NORMAL )
+            draw_folder(self, isSelected) if isDir else draw_file(
+                self, isSelected)  # self.draw_file(isSelected)
+            # Add file name TODO Aggiungere in draw_mod
+            self.outwin.addstr(pos["y"]+dim["y"] - 1, pos["x"], filename[:dim["x"]],
+                               curses.A_UNDERLINE if isDir else curses.A_NORMAL)
 
     def run_ls(self):
         """Function used to run the ls command in the current directory and call the add_file_to_screen"""
-        self.onlyfiles = [f for f in os.listdir(self.currentDirectory) if isfile(join(self.currentDirectory, f))]
-        self.onlydirs = [f for f in os.listdir(self.currentDirectory) if not isfile(join(self.currentDirectory, f))]
+        self.outwin.clear()
+        self.onlyfiles = [f for f in os.listdir(
+            self.currentDirectory) if isfile(join(self.currentDirectory, f))]
+        self.onlydirs = [f for f in os.listdir(
+            self.currentDirectory) if not isfile(join(self.currentDirectory, f))]
         self.pos_idx = {
-            "x" : 1,
-            "y" : 1
+            "x": 1,
+            "y": 1
         }
+        if self.hide_hidden_files:
+            self.onlydirs = list(
+                filter(lambda name: name[0] != '.', self.onlydirs))
+            self.onlyfiles = list(
+                filter(lambda name: name[0] != '.', self.onlyfiles))
+
+        # FILTER FOR HIDDEN FILES
         self.files_on_screen = len(self.onlydirs) + len(self.onlyfiles)
-        self.BOTTOM = ceil(self.files_on_screen / (self.width // self.file_dimension["x"] + 1)) * (self.file_dimension["y"] + 1)
+        self.BOTTOM = ceil(self.files_on_screen / (self.width //
+                                                   self.file_dimension["x"] + 1)) * (self.file_dimension["y"] + 1)
         for el in self.onlydirs:
             self.add_file_to_screen(el, True, el != self.selected_filename)
         for el in self.onlyfiles:
@@ -85,7 +95,6 @@ class WindowFileManager:
         self.outwin.clear()
         self.outwin.refresh()
         self.create()
-        
 
     def navigate_path(self, path):
         """Function to change the currentDirectory path and create the window again"""
@@ -93,7 +102,7 @@ class WindowFileManager:
         self.currentDirectory += "/" + path
         self.test = path.replace("\n", "")
         self.outwin.refresh()
-        self.currentDirectory = self.currentDirectory.replace("\n", "") 
+        self.currentDirectory = self.currentDirectory.replace("\n", "")
         self.inserted_word = ""
         self.create()
 
@@ -119,59 +128,46 @@ class WindowFileManager:
                 curses.curs_set(1)
                 curses.endwin()
 
-    def scroll(self, direction):
-        """Scrolling the window when pressing up/down arrow keys"""
-        # next cursor position after scrolling
-        next_line = self.CURRENT_CURSOR + direction
-
-        # Up direction scroll overflow
-        # current cursor position is 0, but top position is greater than 0
-        if (direction == self.UP) and (self.TOP > 0 and self.CURRENT_CURSOR == 0):
-            self.TOP += direction
-            return
-        # Down direction scroll overflow
-        # next cursor position touch the max lines, but absolute position of max lines could not touch the bottom
-        if (direction == self.DOWN) and (next_line == self.height) and (self.TOP + self.height < self.BOTTOM):
-            self.TOP += direction
-            return
-        # Scroll up
-        # current cursor position or top position is greater than 0
-        if (direction == self.UP) and (self.TOP > 0 or self.CURRENT_CURSOR > 0):
-            self.current = next_line
-            return
-        # Scroll down
-        # next cursor position is above max lines, and absolute position of next cursor could not touch the bottom
-        if (direction == self.DOWN) and (next_line < self.height) and (self.TOP + next_line < self.BOTTOM):
-            self.current = next_line
-            return
-
     def update_selection(self):
         self.run_ls()
-        all_files = self.onlydirs + self.onlyfiles 
+        all_files = self.onlydirs + self.onlyfiles
         for x in all_files:
             if x.find(self.inserted_word) == 0:
                 self.selected_filename = x
                 break
-        
 
     def get_input_key(self, key):
         """Function that retrieve an input from the user and parse it"""
         self.height, self.width = self.outwin.getmaxyx()
-        if key==10: # ENTER KEY
+        if key == 10:  # ENTER KEY
             self.navigate_path(self.selected_filename)
             self.create()
-        elif key==127: # BACKSPACE KEY
+        elif key == 127:  # BACKSPACE KEY
             self.navigate_back()
-        elif key==curses.KEY_RESIZE:
+        elif key == 78:  # N maiuscola
+            create_new_file(self.currentDirectory)
+            self.run_ls()
+        elif key == 77:  # M maiuscola
+            create_new_folder(self.currentDirectory)
+            self.run_ls()
+        elif key == 72:
+            self.hide_hidden_files = not self.hide_hidden_files
+            self.run_ls()
+        elif key == 68:
+            delete_selected_file(self.selected_filename)
+            self.run_ls()
+        elif key == curses.KEY_RESIZE:
             self.display_window()
-        elif key==27:
+        elif key == 27:
             self.inserted_word = ""
         else:
             self.inserted_word += str(chr(key))
             self.update_selection()
 
+
 def main():
     WindowFileManager()
+
 
 if __name__ == "__main__":
     main()
