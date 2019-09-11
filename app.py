@@ -41,6 +41,9 @@ class WindowFileManager:
         curses.curs_set(0)
         if curses.has_colors():
             curses.start_color()
+            curses.use_default_colors()
+            for i in range(0, curses.COLORS):
+                curses.init_pair(i + 1, i, -1)
         self.height, self.width = self.outwin.getmaxyx()
         self.outwin.box()
         try:
@@ -62,7 +65,9 @@ class WindowFileManager:
                 self, isSelected)  # self.draw_file(isSelected)
             # Add file name TODO Aggiungere in draw_mod
             self.outwin.addstr(pos["y"]+dim["y"] - 1, pos["x"], filename[:dim["x"]],
-                               curses.A_UNDERLINE if isDir else curses.A_NORMAL)
+                               curses.A_BOLD | curses.A_UNDERLINE | curses.color_pair(15)
+                               if isDir else
+                               curses.color_pair(15))
 
     def run_ls(self):
         """Function used to run the ls command in the current directory and call the add_file_to_screen"""
@@ -150,15 +155,18 @@ class WindowFileManager:
         elif key == 77:  # M maiuscola
             create_new_folder(self.currentDirectory)
             self.run_ls()
-        elif key == 72:
+        elif key == 72: # H maiuscola
             self.hide_hidden_files = not self.hide_hidden_files
+            self.run_ls()
+        elif key == 32:
+            show_maintab()
             self.run_ls()
         elif key == 68:
             delete_selected_file(self.selected_filename)
             self.run_ls()
         elif key == curses.KEY_RESIZE:
             self.display_window()
-        elif key == 27:
+        elif key == 27: # ESC per resettare 
             self.inserted_word = ""
         else:
             self.inserted_word += str(chr(key))

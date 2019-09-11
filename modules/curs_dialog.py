@@ -3,8 +3,22 @@
 
 import curses
 import sys
+from modules.create_file import *
 
 encoding = sys.getdefaultencoding()
+
+class BaseTabDialog:
+    def __init__(self, **options):
+        self.maxy, self.maxx = curses.LINES, curses.COLS
+        self.win = curses.newwin(12, self.maxx - 2, 0, 1)
+        self.win.box()
+        self.y, self.x = self.win.getmaxyx()
+        self.win.keypad(1)
+        self.enterKey = False
+        self.win.keypad(1)
+        curses.curs_set(0)
+        curses.noecho()
+        curses.cbreak()
 
 
 class CursBaseDialog:
@@ -207,6 +221,11 @@ class ShowMessageDialog(CursBaseDialog):
         if self.win.getch() != ord('\n'):
             self.showMessage()
 
+class MainTabDialog(BaseTabDialog):
+    def showMainTab(self):
+        self.win.addstr("prova", curses.color_pair(3))
+        prova = self.win.getch()
+
 
 class ProgressBarDialog(CursBaseDialog):
     def __init__(self, **options):
@@ -258,6 +277,9 @@ class ProgressBarDialog(CursBaseDialog):
         self.blockValue = blockValue
         self.win.refresh()
 
+
+def showMainTabDialog(**options):
+    return MainTabDialog(**options).showMainTab()
 
 def showMessageDialog(**options):
     return ShowMessageDialog(**options).showMessage()
