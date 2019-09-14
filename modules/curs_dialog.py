@@ -3,7 +3,6 @@
 
 import curses
 import sys
-from modules.create_file import *
 
 encoding = sys.getdefaultencoding()
 
