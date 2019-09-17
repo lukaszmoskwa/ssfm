@@ -75,7 +75,7 @@ class WindowFileManager:
             else:
                 draw_file(self, isSelected, self.theme_number)
             # Add file name TODO Aggiungere in draw_mod
-            #floor((dim["x"] - len(filename))/2)
+            # floor((dim["x"] - len(filename))/2)
             self.outwin.addstr(pos["y"]+dim["y"] - 1, pos["x"] + floor((dim["x"] - len(filename[:dim["x"]]))/2), filename[:dim["x"]],
                                curses.A_BOLD | curses.A_UNDERLINE | curses.color_pair(
                                    self.theme_number)
@@ -89,6 +89,9 @@ class WindowFileManager:
             self.currentDirectory) if isfile(join(self.currentDirectory, f))]
         self.onlydirs = [f for f in os.listdir(
             self.currentDirectory) if not isfile(join(self.currentDirectory, f))]
+        # Alphabetic sort
+        self.onlydirs.sort()
+        self.onlyfiles.sort()
 
     def run_draw(self):
         self.pos_idx = {
@@ -147,7 +150,7 @@ class WindowFileManager:
             try:
                 # if self.inserted_word != "":
                 self.outwin.addstr(self.height-1, 1, str(self.test))
-                #self.outwin.nodelay(1)
+                # self.outwin.nodelay(1)
                 key = self.outwin.getch()
                 self.get_input_key(key)
             except KeyboardInterrupt:
@@ -172,9 +175,22 @@ class WindowFileManager:
         if self.selected_filename != "..":
             current_index = all_files.index(self.selected_filename)
             if direction == "RIGHT":
-                self.selected_filename = all_files[current_index + 1]
+                self.selected_filename = all_files[min(
+                    len(all_files) - 1, current_index + 1)]
             elif direction == "LEFT":
-                self.selected_filename = all_files[current_index - 1]
+                self.selected_filename = all_files[max(0, current_index - 1)]
+            elif direction == "UP":
+                file_per_row = floor(
+                    self.width / (self.file_dimension["x"] + 1))
+                self.selected_filename = all_files[max(
+                    0, current_index - file_per_row)]
+            elif direction == "DOWN":
+                file_per_row = floor(
+                    self.width / (self.file_dimension["x"] + 1))
+                self.selected_filename = all_files[min(
+                    len(all_files) - 1, current_index + file_per_row)]
+        else:
+            self.selected_filename = all_files[0]
         self.run_draw()
 
     def get_input_key(self, key):
@@ -208,7 +224,7 @@ class WindowFileManager:
             self.run_ls()
             self.run_draw()
         elif key == 32:
-            show_maintab()
+            show_maintab(self.theme_number)
             self.run_draw()
         elif key == 68:
             delete_selected_file(self.selected_filename)
@@ -221,6 +237,10 @@ class WindowFileManager:
             self.arrow_navigate("LEFT", False)
         elif key == curses.KEY_RIGHT:
             self.arrow_navigate("RIGHT", False)
+        elif key == curses.KEY_UP:
+            self.arrow_navigate("UP", False)
+        elif key == curses.KEY_DOWN:
+            self.arrow_navigate("DOWN", False)
         elif key == 258 or key == 259:  # Scroll mouse, va sistemato TODO
             self.theme_number = self.theme_number + 1
         else:

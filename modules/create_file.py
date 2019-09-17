@@ -10,9 +10,9 @@ def delete_selected_file(filename):
         title_attr=curses.A_STANDOUT | curses.A_BOLD
     )
 
-def show_maintab():
+def show_maintab(theme):
     """Show the maintab """
-    cose = showMainTabDialog()
+    showMainTabDialog(theme=theme)
 
 
 def create_new_file(cwd):

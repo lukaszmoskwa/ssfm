@@ -9,7 +9,9 @@ encoding = sys.getdefaultencoding()
 class BaseTabDialog:
     def __init__(self, **options):
         self.maxy, self.maxx = curses.LINES, curses.COLS
-        self.win = curses.newwin(12, self.maxx - 2, 0, 1)
+        self.theme = options.get('theme')
+        self.win = curses.newwin(12, self.maxx - 2, self.maxy - 12, 1)
+        self.win.bkgd(' ', curses.color_pair(self.theme) | curses.A_BOLD )
         self.win.box()
         self.y, self.x = self.win.getmaxyx()
         self.win.keypad(1)
@@ -222,8 +224,23 @@ class ShowMessageDialog(CursBaseDialog):
 
 class MainTabDialog(BaseTabDialog):
     def showMainTab(self):
-        self.win.addstr("prova", curses.color_pair(3))
+        ### TODO Spostare nelle configurazioni per rendere piu estensibile
+
+        ## Creare un file 'git.py' in cui passo solo una lettera e in base a quello chiamo una funzione
+        options = [ 
+            ('file', 'f'),
+            ('window', 'w'),
+            ('bookmark', 'b'),
+            ('git', 'g'),
+            ('settings', 's'),
+        ]
+        for (i,x) in enumerate(options):
+            self.win.addstr(i+1, 2, "[" + x[1] + "] " + x[0], curses.color_pair(self.theme))
         prova = self.win.getch()
+        if prova in map(lambda x: ord(x[1]), options):
+            self.win.clear()
+            self.win.box()
+            prova = self.win.getch()
 
 
 class ProgressBarDialog(CursBaseDialog):
