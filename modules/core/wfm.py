@@ -7,7 +7,7 @@ class WindowFileManager:
     outwin_list = []
     height = ""
     window_focus = 0
-    division = 2
+    division = 1
     width = ""
 
     def __init__(self):
@@ -30,7 +30,6 @@ class WindowFileManager:
         self.height, self.width = self.totalwin.getmaxyx()
         self.totalwin.box()
         self.outwin_list.append(WindowList(self, self.division, 0))
-        self.outwin_list.append(WindowList(self, self.division, 1))
 
     def redraw(self):
         self.totalwin.clear()
@@ -40,6 +39,14 @@ class WindowFileManager:
             i.outwin.refresh()
         for i in self.outwin_list:
             i.run_draw()
+
+    def close(self):
+        curses.nocbreak()
+        curses.echo()
+        curses.curs_set(1)
+        curses.endwin()
+        quit()
+
 
     def run_loop(self):
         while True:
@@ -52,8 +59,5 @@ class WindowFileManager:
                 self.outwin_list[self.window_focus].get_input_key(key)
                 self.outwin_list[self.window_focus].run_draw()
             except KeyboardInterrupt:
-                curses.nocbreak()
-                curses.echo()
-                curses.curs_set(1)
-                curses.endwin()
-                quit()
+                self.close()
+                

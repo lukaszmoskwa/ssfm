@@ -82,54 +82,6 @@ class AskYesCancelDialog(CursBaseDialog):
         return False
 
 
-class CreateFile(CursBaseDialog):
-    def fileSave(self):
-        if self.title:
-            self.win.addstr(0, int(self.x/2-len(self.title)/2),
-                            self.title, self.title_attr)
-        for (i, msg) in enumerate(self.message.split('\n')):
-            self.win.addstr(i+1, 2, msg, self.msg_attr)
-
-        option = 'Save as'
-        space = int(self.x/6)
-        pos_x = []
-
-        pos_x.append(space)
-        rectangle(self.win, 8, space-1, 2, len(option)+1, self.opt_attr)
-        space = space + len(option) + 8
-
-        self.win.addstr(9, pos_x[0], 'Create ',
-                        self.focus_attr | self.opt_attr)
-
-        rectangle(self.win, 8, pos_x[self.focus]-1, 2,
-                  len(option)+1, self.focus_attr | self.opt_attr)
-        filepath = None
-
-        curses.echo()
-        curses.cbreak()
-        curses.curs_set(1)
-        self.win.keypad(False)
-        self.win.addstr(4, 2, 'Type here:')
-        self.win.addstr(6, 2, ' '*0, curses.A_UNDERLINE)
-        filepath = ''
-        while True:
-            car = self.win.getch()
-            if car == 27:
-                filepath = None
-                break
-            elif car == 127:
-                self.win.delch()
-            elif car == 10:
-                if filepath == '':  # TODO Serve davvero?
-                    filepath = None
-                break
-            else:
-                car = chr(car)
-                filepath += car
-            #filepath = self.win.getstr(6, 2, curses.A_BOLD).decode('latin1')
-
-        return filepath
-
 
 class AskFileSaveDialog(CursBaseDialog):
     def fileSave(self):
@@ -270,9 +222,6 @@ def showMessageDialog(**options):
 def askFileSaveDialog(**options):
     return AskFileSaveDialog(**options).fileSave()
 
-
-def createFileDialog(**options):
-    return CreateFile(**options).fileSave()
 
 
 def askYesCancelDialog(**options):

@@ -1,6 +1,8 @@
 
 import curses
-from modules.extensions.window_handler import window_handle
+from modules.extensions.window_extension.window_handler import WindowExtension
+from modules.extensions.file_extension.file_handler import FileExtension
+from modules.extensions.git_extension.git_handler import GitExtension
 
 
 class SpaceTab():
@@ -29,23 +31,32 @@ class MainTabDialog(BaseTabDialog):
         # TODO Spostare nelle configurazioni per rendere piu estensibile
 
         # Creare un file 'git.py' in cui passo solo una lettera e in base a quello chiamo una funzione
-        options = [
-            ('file', 'f'),
-            ('window', 'w'),
-            ('bookmark', 'b'),
-            ('git', 'g'),
-            ('settings', 's'),
-        ]
-        for (i, x) in enumerate(options):
-            self.win.addstr(i+1, 2, "[" + x[1] + "] " +
-                            x[0], curses.color_pair(self.theme))
+        options = {
+            'f': ('file', FileExtension),
+            'w': ('window', WindowExtension),
+            'b': ('bookmark', WindowExtension),
+            'g': ('git', GitExtension),
+            's': ('settings', WindowExtension),
+        }
+        for (i, x) in enumerate(options.keys()):
+            self.win.addstr(i+1, 2, "[" + x + "] " +
+                            options[x][0], curses.color_pair(self.theme))
         key = self.win.getch()
-        if key in map(lambda x: ord(x[1]), options):
+        if key in map(lambda x: ord(x), options.keys()):
             self.win.clear()
             self.win.box()
-            if key == ord('w'):
-                window_handle(self.win.getch(), self.wfm)
+            self.display_options(options[chr(key)][1]().get_options())
+            options[chr(key)][1]().handle(self.win.getch(), self.wfm)
+
+    def display_options(self, options):
+        for (i, x) in enumerate(options):
+            self.win.addstr(i+1, 2, "[" + x[0] + "] " +
+                            x[1], curses.color_pair(self.theme))
 
 
 def showMainTabDialog(**options):
     return MainTabDialog(**options).showMainTab()
+
+
+def displayTabOptions(**options):
+    return MainTabDialog(**options).display_options(options=options)
