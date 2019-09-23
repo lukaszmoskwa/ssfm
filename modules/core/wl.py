@@ -3,6 +3,7 @@
 import curses
 import os
 import sys
+import subprocess
 from os.path import isfile, join
 from math import ceil, floor
 from modules.draw.draw_mod import draw_file, draw_folder
@@ -39,7 +40,7 @@ class WindowList:
             os.chdir(os.path.expandvars("$HOME"))
             self.currentDirectory = os.getcwd()
 
-        self.theme = window_file_manager.theme_number
+        self.theme = window_file_manager.theme
         self.wfm = window_file_manager
         self.local_id = local_id
         self.vsplit = vsplit
@@ -47,7 +48,6 @@ class WindowList:
         self.width = floor(self.width / vsplit)
         self.outwin = window_file_manager.totalwin.subwin(
             self.height, self.width, 0, local_id * self.width)
-        # self.outwin.keypad(1)
         self.outwin.box()
         try:
             self.run_ls()
@@ -62,6 +62,8 @@ class WindowList:
 
     def add_file_to_screen(self, filename, isDir, isSelected):
         """Function to add a folder or a file to the screen"""
+        foreground = curses.pair_number(1)
+        background = curses.color_pair(2)
         pos = self.pos_idx
         dim = self.file_dimension
         if self.pos_idx["x"] + dim["x"] > self.width-1:
@@ -74,12 +76,10 @@ class WindowList:
                 draw_file(self, isSelected, self.theme)
 
             # Add file name TODO Aggiungere in draw_mod
-            # floor((dim["x"] - len(filename))/2)
             self.outwin.addstr(pos["y"]+dim["y"] - 1, pos["x"] + floor((dim["x"] - len(filename[:dim["x"]]))/2), filename[:dim["x"]],
-                               curses.A_BOLD | curses.A_UNDERLINE | curses.color_pair(
-                                   self.theme)
+                                background | curses.A_NORMAL | curses.A_BOLD  | curses.A_UNDERLINE 
                                if isDir else
-                               curses.color_pair(self.theme))
+                               background)
         self.pos_idx["x"] += dim["x"] + 1
 
     def run_ls(self):
@@ -105,11 +105,12 @@ class WindowList:
         self.outwin = self.wfm.totalwin.subwin(
             self.height, self.width, 0, self.local_id * self.width)
         self.outwin.box()
-        self.outwin.bkgd(' ', curses.color_pair(self.theme) | curses.A_BOLD)
-        self.outwin.addstr(0, 0, '░'*self.width, curses.A_REVERSE |
-                           curses.color_pair(self.theme))
+        self.outwin.bkgd(' ', curses.color_pair(2) | curses.A_BOLD | curses.A_REVERSE)
+        #self.outwin.bkgd(' ', curses.color_pair(self.theme) | curses.A_BOLD)
+        self.outwin.addstr(0, 0, ' '*self.width, curses.A_REVERSE |
+                           curses.color_pair(1))
         self.outwin.addstr(0, 0, self.currentDirectory,
-                           curses.A_REVERSE | curses.color_pair(self.theme))
+                           curses.A_REVERSE | curses.color_pair(1))
         # FILTER FOR HIDDEN FILES
         if self.hide_hidden_files:
             self.onlydirs = list(
@@ -175,6 +176,8 @@ class WindowList:
 
     def arrow_navigate(self, direction, hasShift):
         all_files = self.onlydirs + self.onlyfiles
+        if not all_files:
+            return
         if self.selected_filename != "..":
             current_index = all_files.index(self.selected_filename)
             if direction == "RIGHT":
@@ -204,21 +207,13 @@ class WindowList:
                 self.navigate_path(self.selected_filename)
                 self.create()
             else:
-                #subprocess.call(["vim", self.selected_filename])
+                subprocess.call(["xdg-open", self.selected_filename])
                 self.inserted_word = ""
                 curses.curs_set(0)
-                self.create()
+                self.wfm.totalwin.keypad(1)
+                #self.create()
         elif key == curses.KEY_BACKSPACE:  # BACKSPACE KEY
             self.navigate_back()
-        # elif key == 78:  # N maiuscola
-        #    create_new_file(self.currentDirectory)
-        #    #self.run_ls()
-        # elif key == 77:  # M maiuscola
-        #    create_new_folder(self.currentDirectory)
-        # elif key == 84:  # T maiuscola
-        #    subprocess.call(["lxterminal"])
-        # elif key == 71:  # G maiuscola
-        #    subprocess.call(["tig", "status", self.currentDirectory])
         elif key == 72:  # H maiuscola
             self.hide_hidden_files = not self.hide_hidden_files
             self.run_ls()
@@ -231,8 +226,6 @@ class WindowList:
         #    self.run_ls()
         elif key == 27:  # ESC per resettare
             self.inserted_word = ""
-        elif key == 258 or key == 259:  # Scroll mouse, va sistemato TODO
-            self.theme_number = self.theme + 1
         else:
             self.inserted_word += str(chr(key))
             self.update_selection()

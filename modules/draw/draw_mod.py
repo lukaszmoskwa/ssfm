@@ -9,41 +9,42 @@ reload(sys)
 # Function used to draw
 
 
-
-def draw_file(main_win, isSelected, theme_number):
+def draw_file(main_win, isSelected, theme):
     """Function used to draw the file"""
-    theme = curses.color_pair(theme_number)
+    foreground = curses.color_pair(1) 
+    background = curses.color_pair(2)
     pos = main_win.pos_idx
     dim = main_win.file_dimension
     for y in range(0, dim["y"]-1):
         for x in range(0, dim["x"]):
             if y == 0:
                 main_win.outwin.addstr(pos["y"] + y, pos["x"] + x, "┏" if x == 0 else (
-                    "┓" if x == dim["x"]-1 else "━"), curses.A_NORMAL | theme if isSelected else curses.A_REVERSE | theme)
+                    "┓" if x == dim["x"]-1 else "━"), curses.A_NORMAL | background if isSelected else curses.A_REVERSE | foreground)
             elif y == dim["y"]-2:
                 main_win.outwin.addstr(pos["y"] + y, pos["x"] + x, "┗" if x == 0 else (
-                    "┛" if x == dim["x"]-1 else "━"), curses.A_NORMAL | theme if isSelected else curses.A_REVERSE | theme)
+                    "┛" if x == dim["x"]-1 else "━"), curses.A_NORMAL | background if isSelected else curses.A_NORMAL | foreground)
             else:
                 main_win.outwin.addstr(pos["y"] + y, pos["x"] + x, "┃" if x == 0 or x ==
-                                       dim["x"]-1 else "░", curses.A_NORMAL | theme if isSelected else curses.A_REVERSE | theme)
+                                       dim["x"]-1 else "░", curses.A_REVERSE | background if isSelected else curses.A_NORMAL | foreground)
 
-def draw_folder(main_win, isSelected, theme_number):
+
+def draw_folder(main_win, isSelected, theme):
     """Function used to draw the file"""
-    theme = curses.color_pair(theme_number)
+    foreground = curses.color_pair(1)
+    background = curses.color_pair(2)
     pos = main_win.pos_idx
     dim = main_win.file_dimension
     for y in range(0, dim["y"]-1):
         for x in range(0, dim["x"]):
             if y == 0:
                 main_win.outwin.addstr(pos["y"] + y, pos["x"] + x, "┏" if x == 0 else (
-                    "┓" if x == dim["x"]-1 else "━"), curses.A_NORMAL | theme if isSelected else curses.A_REVERSE | theme) 
+                    "┓" if x == dim["x"]-1 else "━"), curses.A_NORMAL | background if isSelected else curses.A_NORMAL | foreground)
             elif y == dim["y"]-2:
                 main_win.outwin.addstr(pos["y"] + y, pos["x"] + x, "┗" if x == 0 else (
-                    "┛" if x == dim["x"]-1 else "━"), curses.A_NORMAL | theme if isSelected else curses.A_REVERSE | theme)
+                    "┛" if x == dim["x"]-1 else "━"), curses.A_NORMAL | background if isSelected else curses.A_NORMAL | foreground)
             else:
                 main_win.outwin.addstr(pos["y"] + y, pos["x"] + x, "┃" if x == 0 or x ==
-                                       dim["x"]-1 else "▓", curses.A_NORMAL | theme if isSelected else curses.A_REVERSE | theme)
-
+                                       dim["x"]-1 else "▓", curses.A_NORMAL | background if isSelected else curses.A_NORMAL | foreground)
 
 
 def draw_folder2(main_win, isSelected):
@@ -65,5 +66,4 @@ def draw_folder2(main_win, isSelected):
             else:
                 main_win.outwin.addstr(pos["y"] + y, pos["x"] + x, "║" if x == 0 or x ==
                                        dim["x"]-1 else " ", curses.A_NORMAL if isSelected else curses.A_REVERSE)
-
 

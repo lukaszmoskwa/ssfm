@@ -14,8 +14,9 @@ class BaseTabDialog:
         self.wfm = options.get('wfm')
         self.maxy, self.maxx = self.wfm.height, self.wfm.width
         self.theme = options.get('theme')
-        self.win = curses.newwin(12, self.maxx - 2, self.maxy - 12, 1)
-        self.win.bkgd(' ', curses.color_pair(self.theme) | curses.A_BOLD)
+        self.win = curses.newwin(12, self.maxx - 2, self.maxy - 13, 1)
+        self.win.bkgd(' ', curses.color_pair(
+            2) | curses.A_BOLD | curses.A_REVERSE)
         self.win.box()
         self.y, self.x = self.win.getmaxyx()
         self.win.keypad(1)
@@ -29,8 +30,7 @@ class BaseTabDialog:
 class MainTabDialog(BaseTabDialog):
     def showMainTab(self):
         # TODO Spostare nelle configurazioni per rendere piu estensibile
-
-        # Creare un file 'git.py' in cui passo solo una lettera e in base a quello chiamo una funzione
+        curses.curs_set(0)
         options = {
             'f': ('file', FileExtension),
             'w': ('window', WindowExtension),
@@ -40,7 +40,7 @@ class MainTabDialog(BaseTabDialog):
         }
         for (i, x) in enumerate(options.keys()):
             self.win.addstr(i+1, 2, "[" + x + "] " +
-                            options[x][0], curses.color_pair(self.theme))
+                            options[x][0], curses.color_pair(2) | curses.A_NORMAL)
         key = self.win.getch()
         if key in map(lambda x: ord(x), options.keys()):
             self.win.clear()
@@ -51,7 +51,7 @@ class MainTabDialog(BaseTabDialog):
     def display_options(self, options):
         for (i, x) in enumerate(options):
             self.win.addstr(i+1, 2, "[" + x[0] + "] " +
-                            x[1], curses.color_pair(self.theme))
+                            x[1], curses.color_pair(2) | curses.A_NORMAL)
 
 
 def showMainTabDialog(**options):

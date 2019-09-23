@@ -18,6 +18,8 @@ class GitExtension(ExtensionHandler):
             self.git_log()
         elif character == ord('s'):
             self.git_status()
+        wfm.totalwin.keypad(1)
+
 
 
     def git_summary(self):

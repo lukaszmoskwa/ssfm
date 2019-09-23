@@ -2,7 +2,10 @@ import curses
 from modules.core.wl import WindowList
 
 class WindowFileManager:
-    theme_number = 13
+    theme = {
+        'foreground': 32,
+        'background': 234
+    }
     totalwin = ""
     outwin_list = []
     height = ""
@@ -27,6 +30,8 @@ class WindowFileManager:
             curses.use_default_colors()
             for i in range(0, curses.COLORS):
                 curses.init_pair(i + 1, i, -1)
+            curses.init_pair(1, self.theme['foreground'], self.theme['background'])
+            curses.init_pair(2, self.theme['background'], self.theme['foreground'])
         self.height, self.width = self.totalwin.getmaxyx()
         self.totalwin.box()
         self.outwin_list.append(WindowList(self, self.division, 0))
