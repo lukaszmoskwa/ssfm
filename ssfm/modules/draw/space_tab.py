@@ -34,9 +34,9 @@ class MainTabDialog(BaseTabDialog):
         options = {
             'f': ('file', FileExtension),
             'w': ('window', WindowExtension),
-            'b': ('bookmark', WindowExtension),
+            #'b': ('bookmark', WindowExtension),
             'g': ('git', GitExtension),
-            's': ('settings', WindowExtension),
+            #'s': ('settings', WindowExtension),
         }
         for (i, x) in enumerate(options.keys()):
             self.win.addstr(i+1, 2, "[" + x + "] " +
