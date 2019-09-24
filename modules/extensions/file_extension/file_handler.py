@@ -70,6 +70,7 @@ class FileExtension(ExtensionHandler):
         ['n', 'new file'],
         ['m', 'new folder'],
         ['e', 'edit file'],
+        ['r', 'rename'],
         ['d', 'delete file or folder'],
         ['y', 'copy'],
         ['x', 'cut'],
@@ -91,6 +92,8 @@ class FileExtension(ExtensionHandler):
             self.copy_file(self.outwin.currentDirectory)
         elif character == ord('p'):
             self.paste_file(self.outwin.currentDirectory)
+        elif character == ord('r'):
+            self.rename_file()
 
         if self.wfm.copy_path != "":
             self.options[-1][1] = "paste [ " + self.wfm.copy_path + " ]"
@@ -146,6 +149,18 @@ class FileExtension(ExtensionHandler):
             except FileExistsError:
                 pass
             # showMessageDialog(message=text, title='Display message ')
+
+    def rename_file(self):
+        """ Run the command to rename a file or folder """
+        src = self.outwin.selected_filename
+        name = createFileDialog(
+            message='Rename ' + ( 'folder' if isdir(self.outwin.selected_filename) else 'file' ) ,
+            title='Rename')
+        if name != None:
+            try:
+                os.rename(src, name)
+            except FileExistsError:
+                pass
 
     def copy_file(self, cwd):
         filename = self.outwin.selected_filename
