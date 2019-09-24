@@ -15,7 +15,7 @@ pip3 install ssfm
 or clone and install from this repository manually.
 
 
-### Documentaion
+### Documentation
 
 The project is mainly inspired by SpaceVim, a terminal editor where operations are done with the spacebar 
 key as leader. Below is a simplified version of the documentation with the main key combinations.
@@ -48,6 +48,12 @@ In order to use the git functionalities, it is actually required to install tig
 + ```<SPC><g><g>```: Summary of the status of the current git folder 
 + ```<SPC><g><s>```: Status - tig status command 
 + ```<SPC><g><l>```: Log - tig log command 
+
+
+### Acknowledgements
+
+
+Per la realizzazione di alcuni box, ho fatto uso della libreria cursesDialog (https://github.com/jacklam718/cursesDialog)  
 
 
 

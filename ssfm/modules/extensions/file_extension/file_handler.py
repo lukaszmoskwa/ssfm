@@ -49,13 +49,12 @@ class CreateFile(BaseDialog):
                 self.win.addstr(4, 2, filepath, curses.A_UNDERLINE)
                 continue
             elif car == 10:
-                if filepath == '':  # TODO Serve davvero?
+                if filepath == '': 
                     filepath = None
                 break
             else:
                 car = chr(car)
                 filepath += car
-            # filepath = self.win.getstr(6, 2, curses.A_BOLD).decode('latin1')
 
         return filepath
 
@@ -118,7 +117,7 @@ class FileExtension(ExtensionHandler):
         if path == '..':
             path = '.'
         if isdir(path):
-            subprocess.run(["code", path],  # TODO substitute with custom editor
+            subprocess.run(["vim", path],  # TODO substitute with custom editor
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         else:
             subprocess.run(["vim", path])  # TODO substitute with custom editor
@@ -148,7 +147,6 @@ class FileExtension(ExtensionHandler):
                 os.mkdir(filepath)
             except FileExistsError:
                 pass
-            # showMessageDialog(message=text, title='Display message ')
 
     def rename_file(self):
         """ Run the command to rename a file or folder """
@@ -210,4 +208,3 @@ class FileExtension(ExtensionHandler):
         except:
             self.show_rectangle("  Error   ")
             pass
-        #shutil.copy2(self.wfm.copy_path, cwd+"/name")

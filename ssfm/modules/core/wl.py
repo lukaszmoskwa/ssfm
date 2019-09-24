@@ -17,7 +17,7 @@ class WindowList:
     onlydirs = []
     onlyfiles = []
     onlylinks = []
-    selected_filename = ".."  # FIX THIS
+    selected_filename = ".."  
     selected_index = []
     height = 0
     width = 0
@@ -77,7 +77,7 @@ class WindowList:
             else:
                 draw_file(self, isSelected, self.theme)
 
-            # Add file name TODO Aggiungere in draw_mod
+            # TODO Move to draw
             self.outwin.addstr(pos["y"]+dim["y"] - 1, pos["x"] + floor((dim["x"] - len(filename[:dim["x"]]))/2), filename[:dim["x"]],
                                background | curses.A_NORMAL | curses.A_BOLD | curses.A_UNDERLINE
                                if isDir else
@@ -101,7 +101,7 @@ class WindowList:
             "x": 1,
             "y": 2
         }
-        # necessario per resize
+        # Necessary for resize
         self.outwin.clear()
         self.outwin.refresh()
         self.height, self.width = self.wfm.totalwin.getmaxyx()
@@ -257,7 +257,7 @@ class WindowList:
             showMainTabDialog(theme=self.theme, wfm=self.wfm)
         elif key in (curses.KEY_RIGHT, curses.KEY_LEFT, curses.KEY_UP, curses.KEY_DOWN):
             self.arrow_handler(key)
-        elif key == 27:  # ESC per resettare
+        elif key == 27:  # ESC for reset
             self.inserted_word = ""
         else:
             self.inserted_word += str(chr(key))

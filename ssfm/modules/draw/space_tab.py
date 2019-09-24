@@ -29,7 +29,7 @@ class BaseTabDialog:
 
 class MainTabDialog(BaseTabDialog):
     def showMainTab(self):
-        # TODO Spostare nelle configurazioni per rendere piu estensibile
+        # TODO Move in configs 
         curses.curs_set(0)
         options = {
             'f': ('file', FileExtension),
