@@ -1,6 +1,7 @@
 import curses
 import subprocess
 import os
+import time
 import shutil
 from os.path import isdir, isfile
 import modules.draw.space_tab
@@ -54,7 +55,7 @@ class CreateFile(BaseDialog):
             else:
                 car = chr(car)
                 filepath += car
-            #filepath = self.win.getstr(6, 2, curses.A_BOLD).decode('latin1')
+            # filepath = self.win.getstr(6, 2, curses.A_BOLD).decode('latin1')
 
         return filepath
 
@@ -66,29 +67,39 @@ def createFileDialog(**options):
 class FileExtension(ExtensionHandler):
 
     options = [
-        ('n', 'new file'),
-        ('n', 'new folder'),
-        ('e', 'edit file'),
-        ('d', 'delete file or folder'),
+        ['n', 'new file'],
+        ['m', 'new folder'],
+        ['e', 'edit file'],
+        ['d', 'delete file or folder'],
+        ['y', 'copy'],
+        ['x', 'cut'],
+        ['p', 'paste [ ]'],
     ]
 
     def handle(self, character, wfm):
         self.wfm = wfm
-        outwin = wfm.outwin_list[wfm.window_focus]
+        self.outwin = wfm.outwin_list[wfm.window_focus]
         if character == ord('n'):
-            self.create_new_file(
-                wfm.outwin_list[wfm.window_focus].currentDirectory)
+            self.create_new_file(self.outwin.currentDirectory)
         elif character == ord('e'):
-            self.edit_file_or_folder(outwin.selected_filename)
+            self.edit_file_or_folder(self.outwin.selected_filename)
         elif character == ord('d'):
-            self.delete_file_or_folder(outwin.selected_filename)
+            self.delete_file_or_folder(self.outwin.selected_filename)
         elif character == ord('m'):
-            self.create_new_folder(
-                wfm.outwin_list[wfm.window_focus].currentDirectory)
+            self.create_new_folder(self.outwin.currentDirectory)
+        elif character == ord('y'):
+            self.copy_file(self.outwin.currentDirectory)
+        elif character == ord('p'):
+            self.paste_file(self.outwin.currentDirectory)
 
-        outwin.run_ls()
-        outwin.run_draw()
-        outwin.selected_filename = '..'
+        if self.wfm.copy_path != "":
+            self.options[-1][1] = "paste [ " + self.wfm.copy_path + " ]"
+        else:
+            self.options[-1][1] = "paste [ ]"
+
+        self.outwin.run_ls()
+        self.outwin.run_draw()
+        self.outwin.selected_filename = '..'
         curses.curs_set(0)
 
     def create_new_file(self, cwd):
@@ -97,7 +108,7 @@ class FileExtension(ExtensionHandler):
             message='Choose a name for the new file',
             title='Create new file')
         if filepath != None:
-            subprocess.run(["touch", filepath], 
+            subprocess.run(["touch", filepath],
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     def edit_file_or_folder(self, path):
@@ -134,4 +145,54 @@ class FileExtension(ExtensionHandler):
                 os.mkdir(filepath)
             except FileExistsError:
                 pass
-            #showMessageDialog(message=text, title='Display message ')
+            # showMessageDialog(message=text, title='Display message ')
+
+    def copy_file(self, cwd):
+        filename = self.outwin.selected_filename
+        if filename == "..":
+            return
+        self.wfm.is_copy = True
+        self.wfm.copy_path = cwd + "/" + filename
+        self.outwin.reset_input()
+        self.show_rectangle("   Copied   ")
+
+    def cut_file(self, cwd):
+        filename = self.outwin.selected_filename
+        if filename == "..":
+            return
+        self.wfm.is_copy = False
+        self.wfm.copy_path = cwd + "/" + filename
+        self.outwin.reset_input()
+        self.show_rectangle("   Cut    ")
+
+
+    def show_rectangle(self, temp):
+        rectangle(self.outwin.outwin, self.outwin.height //
+                  2 - 2, (self.outwin.width // 2) - 7, 4, 14, 0)
+        self.outwin.outwin.addstr(self.outwin.height // 2 - 1,
+                                  (self.outwin.width // 2) - len(temp)//2, " " * (len(temp) + 1), curses.A_REVERSE | curses.A_BOLD)
+        self.outwin.outwin.addstr(self.outwin.height // 2,
+                                  (self.outwin.width // 2) - len(temp)//2, temp, curses.A_REVERSE | curses.A_BOLD)
+        self.outwin.outwin.addstr(self.outwin.height // 2 + 1,
+                                  (self.outwin.width // 2) - len(temp)//2, " " * (len(temp) + 1), curses.A_REVERSE | curses.A_BOLD)
+        self.outwin.outwin.refresh()
+        time.sleep(0.5)
+
+    def paste_file(self, cwd):
+        src = self.wfm.copy_path
+        dst = cwd + "/" + os.path.basename(src)
+        try:
+            if self.wfm.is_copy:
+                if isdir(src):
+                    shutil.copytree(src, dst)
+                elif isfile(src):
+                    shutil.copy2(src,dst)
+            else:
+                shutil.move(src, dst)
+
+            self.wfm.copy_path = ""
+            self.outwin.reset_input()
+        except:
+            self.show_rectangle("  Error   ")
+            pass
+        #shutil.copy2(self.wfm.copy_path, cwd+"/name")

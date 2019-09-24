@@ -12,6 +12,8 @@ class WindowFileManager:
     window_focus = 0
     division = 1
     width = ""
+    copy_path = ""
+    is_copy = True # False if cut
 
     def __init__(self):
         self.create()
