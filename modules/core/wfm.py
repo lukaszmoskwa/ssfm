@@ -4,7 +4,7 @@ from modules.core.wl import WindowList
 class WindowFileManager:
     theme = {
         'foreground': 32,
-        'background': 234
+        'background': 232
     }
     totalwin = ""
     outwin_list = []
@@ -29,7 +29,7 @@ class WindowFileManager:
             curses.start_color()
             curses.use_default_colors()
             for i in range(0, curses.COLORS):
-                curses.init_pair(i + 1, i, -1)
+                curses.init_pair(i, i, -1)
             curses.init_pair(1, self.theme['foreground'], self.theme['background'])
             curses.init_pair(2, self.theme['background'], self.theme['foreground'])
         self.height, self.width = self.totalwin.getmaxyx()
@@ -45,11 +45,13 @@ class WindowFileManager:
         for i in self.outwin_list:
             i.run_draw()
 
-    def close(self):
+    def close(self, err_string=""):
         curses.nocbreak()
         curses.echo()
         curses.curs_set(1)
         curses.endwin()
+        if err_string != "":
+            print(err_string)
         quit()
 
 
