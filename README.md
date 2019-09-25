@@ -3,6 +3,7 @@
 ssfm is a simple file-manager created to simplify operations involving files from the terminal. 
 This can be particularly useful when using SSH connections and you only have the command line available.
 
+![](screenshot.png)
 
 ### Installation
 
