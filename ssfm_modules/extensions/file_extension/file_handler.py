@@ -4,9 +4,9 @@ import os
 import time
 import shutil
 from os.path import isdir, isfile
-import modules.draw.space_tab
-from modules.extensions.extension_handler import ExtensionHandler
-from modules.draw.dialogs import BaseDialog, rectangle, AskYesCancelDialog
+import ssfm_modules.draw.space_tab
+from ssfm_modules.extensions.extension_handler import ExtensionHandler
+from ssfm_modules.draw.dialogs import BaseDialog, rectangle, AskYesCancelDialog
 
 
 class CreateFile(BaseDialog):

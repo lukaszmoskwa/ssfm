@@ -1,6 +1,6 @@
 
-import modules.core.wl
-from modules.extensions.extension_handler import ExtensionHandler
+import ssfm_modules.core.wl
+from ssfm_modules.extensions.extension_handler import ExtensionHandler
 
 
 class WindowExtension(ExtensionHandler):
@@ -25,7 +25,7 @@ class WindowExtension(ExtensionHandler):
 
     def new_window(self, wfm):
         wfm.division += 1
-        wfm.outwin_list.append(modules.core.wl.WindowList(
+        wfm.outwin_list.append(ssfm_modules.core.wl.WindowList(
             wfm, wfm.division, wfm.division - 1))
         self.switch_focus(wfm)
         wfm.redraw()

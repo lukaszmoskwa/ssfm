@@ -6,8 +6,8 @@ import sys
 import subprocess
 from os.path import isfile, join, isdir, islink
 from math import ceil, floor
-from modules.draw.draw_mod import draw_file, draw_folder
-from modules.draw.space_tab import showMainTabDialog
+from ssfm_modules.draw.draw_mod import draw_file, draw_folder
+from ssfm_modules.draw.space_tab import showMainTabDialog
 
 
 class WindowList:

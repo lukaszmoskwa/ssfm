@@ -1,4 +1,6 @@
-from modules.core.wfm import WindowFileManager
+#!/usr/bin/env python3
+
+from ssfm_modules.core.wfm import WindowFileManager
 
 
 def main():

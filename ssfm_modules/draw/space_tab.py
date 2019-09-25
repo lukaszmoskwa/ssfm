@@ -1,8 +1,8 @@
 
 import curses
-from modules.extensions.window_extension.window_handler import WindowExtension
-from modules.extensions.file_extension.file_handler import FileExtension
-from modules.extensions.git_extension.git_handler import GitExtension
+from ssfm_modules.extensions.window_extension.window_handler import WindowExtension
+from ssfm_modules.extensions.file_extension.file_handler import FileExtension
+from ssfm_modules.extensions.git_extension.git_handler import GitExtension
 
 
 class SpaceTab():

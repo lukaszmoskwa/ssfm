@@ -1,6 +1,6 @@
 import curses
 import subprocess
-from modules.extensions.extension_handler import ExtensionHandler
+from ssfm_modules.extensions.extension_handler import ExtensionHandler
 
 
 class GitExtension(ExtensionHandler):

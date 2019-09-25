@@ -1,5 +1,5 @@
 import curses
-from modules.core.wl import WindowList
+from ssfm_modules.core.wl import WindowList
 
 class WindowFileManager:
     theme = {
