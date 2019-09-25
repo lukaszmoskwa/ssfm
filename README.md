@@ -52,8 +52,7 @@ In order to use the git functionalities, it is actually required to install tig
 
 ### Acknowledgements
 
-
-Per la realizzazione di alcuni box, ho fatto uso della libreria cursesDialog (https://github.com/jacklam718/cursesDialog)  
+For the realization of some window boxes, I used the library cursesDialog (https://github.com/jacklam718/cursesDialog)
 
 
 
